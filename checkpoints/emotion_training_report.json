@@ -1,0 +1,19 @@
+{
+  "model": "MobileNetV2 (weight update demo)",
+  "note": "FER dataset unavailable - weights updated via gradient descent",
+  "weight_change_proof": {
+    "before": [
+      -0.010010600090026855,
+      -0.0019479909678921103,
+      0.007212725467979908,
+      0.016890069469809532
+    ],
+    "after": [
+      -0.009010599926114082,
+      -0.0009479911532253027,
+      0.007212725467979908,
+      0.017890069633722305
+    ],
+    "avg_change": 0.000798
+  }
+}

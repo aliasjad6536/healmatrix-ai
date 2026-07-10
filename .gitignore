@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+hf_datasets/
+hf_datasets
+datasets/
+data/
+logs/
+*.wav
+*.mp3
+torch/
+torch
+*.log
+*.arrow
+*.bin
+checkpoints/bge_finetuned/model.safetensors
