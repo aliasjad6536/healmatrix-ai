@@ -4,7 +4,6 @@
 
 FROM python:3.11-slim
 
-
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
@@ -18,23 +17,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy all project files
-COPY pyproject.toml .
-COPY main.py .
-COPY config.py .
-COPY agi_engine.py .
-COPY voice_input.py .
-COPY sentiment_analysis.py .
-COPY therapist_finder.py .
-COPY crisis_detection.py .
-COPY emotion_detection.py .
-COPY pose_detection.py .
-COPY rag_system.py .
 
 RUN pip install --upgrade pip uv
 
 RUN uv pip install --system \
     torch==2.2.2+cpu \
+    torchvision==0.17.2+cpu \
     --extra-index-url https://download.pytorch.org/whl/cpu
 
 RUN uv pip install --system \
@@ -55,6 +43,21 @@ RUN uv pip install --system \
     pandas \
     pillow
 
+COPY main.py .
+COPY config.py .
+COPY agi_engine.py .
+COPY voice_input.py .
+COPY sentiment_analysis.py .
+COPY therapist_finder.py .
+COPY crisis_detection.py .
+COPY emotion_detection.py .
+COPY pose_detection.py .
+COPY rag_system.py .
+COPY build_knowledge_base.py .
+
+COPY checkpoints/ ./checkpoints/
+
+# here i creta data dir
 RUN mkdir -p data/chat_logs data/emotions data/crisis_alerts \
     data/session data/rag_vectorstore data/knowledge_base
 
