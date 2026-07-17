@@ -15,3 +15,4 @@ torch
 *.arrow
 *.bin
 checkpoints/bge_finetuned/model.safetensors
+.env

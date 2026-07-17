@@ -1,15 +1,18 @@
-# HealMatrix AI  Configuration
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-GROQ_API_KEY        = "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"
-GROQ_MODEL          = "llama-3.3-70b-versatile"
-GROQ_WHISPER_MODEL  = "whisper-large-v3-turbo"
+GROQ_API_KEY        = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL          = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_WHISPER_MODEL  = os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo")
 
-TWILIO_ACCOUNT_SID     = "ACaba86f502369a855bd5ea743bbd4953a"
-TWILIO_AUTH_TOKEN      = "3f4c8c4223db341d8f0640c70ae8253a"
-TWILIO_FROM_NUMBER     = "+19783071242"   
-TWILIO_PHONE_NUMBER    = "+19783071242"   
-TWILIO_WHATSAPP_NUMBER = "whatsapp:+14155238886"   
-EMERGENCY_CONTACT      = "+923123132321"          
-EMERGENCY_WHATSAPP     = "whatsapp:+923123132321"  
+TWILIO_ACCOUNT_SID     = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN      = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_FROM_NUMBER     = os.getenv("TWILIO_PHONE_NUMBER", "")
+TWILIO_PHONE_NUMBER    = os.getenv("TWILIO_PHONE_NUMBER", "")
+TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
+EMERGENCY_CONTACT      = os.getenv("EMERGENCY_CONTACT", "")
+EMERGENCY_WHATSAPP     = os.getenv("EMERGENCY_WHATSAPP", "")
 
-GOOGLE_MAPS_API_KEY = "AIzaSyATU0o7EYg4b0SczYKvr0F2pRtGDyqDtq4"
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
+NGROK_AUTHTOKEN     = os.getenv("NGROK_AUTHTOKEN", "")
