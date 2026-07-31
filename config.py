@@ -6,27 +6,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-<<<<<<< HEAD
-GROQ_API_KEY       = ""
-GROQ_MODEL         = ""
-GROQ_WHISPER_MODEL = ""
-
-TWILIO_ACCOUNT_SID     = ""
-TWILIO_AUTH_TOKEN      = ""
-TWILIO_FROM_NUMBER     = ""
-TWILIO_PHONE_NUMBER    = ""
-TWILIO_WHATSAPP_NUMBER = ""
-EMERGENCY_CONTACT      = ""
-EMERGENCY_WHATSAPP     = ""
-
-GOOGLE_MAPS_API_KEY = ""  
-
-NGROK_AUTHTOKEN = ""
-
-NGROK_PUBLIC_URL     = ""
-VOICE_WEBHOOK_URL    = f"{NGROK_PUBLIC_URL}/voice/crisis"
-STATUS_CALLBACK_URL  = f"{NGROK_PUBLIC_URL}/status/call"
-=======
 GROQ_API_KEY       = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL         = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 GROQ_WHISPER_MODEL = os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo")
@@ -47,4 +26,3 @@ NGROK_AUTHTOKEN     = os.getenv("NGROK_AUTHTOKEN", "")
 NGROK_PUBLIC_URL    = os.getenv("NGROK_PUBLIC_URL", "")
 VOICE_WEBHOOK_URL   = f"{NGROK_PUBLIC_URL}/voice/crisis" if NGROK_PUBLIC_URL else ""
 STATUS_CALLBACK_URL = f"{NGROK_PUBLIC_URL}/status/call" if NGROK_PUBLIC_URL else ""
->>>>>>> 5026811 (Fix pose evaluation ordering, add validation tracking, update results)
