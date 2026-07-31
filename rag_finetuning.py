@@ -1,19 +1,5 @@
 """
-HealMatrix AI — RAG / BGE Embedding Fine-Tuning (FIXED)
-========================================================
-
-Fixed Issues:
-- empathetic_dialogues: deprecated → uses trust_remote_code + fallback
-- daily_dialog: deprecated → uses better_daily_dialog as fallback
-- Added ShenLab/MentalChat16K as primary extra dataset
-- Robust error handling for each dataset
-
-Project:  HealMatrix AI — AI Mental Health Therapist
-Model:    BAAI/bge-small-en-v1.5
-Output:   checkpoints/bge_finetuned/
-
-Usage:
-    python rag_finetuning.py
+HealMatrix AI — RAG / BGE Embedding Fine-Tuning 
 """
 
 import os

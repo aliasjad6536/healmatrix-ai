@@ -1,8 +1,16 @@
 # HealMatrix AI — Dockerfile
-# Build: docker build -t healmatrix-ai .
-# Run:   docker run -p 7860:7860 healmatrix-ai
+# Terminal 1 — Docker container chalao (agar already build hai)
+#docker compose up -d
+#docker ps
+
+# Terminal 2 — public link banao
+#ssh -R 80:localhost:7860 nokey@localhost.run
+
 
 FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update && apt-get install -y \
     libgl1 \
@@ -17,29 +25,28 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-
 RUN pip install --upgrade pip uv
 
 RUN uv pip install --system \
-    torch==2.2.2+cpu \
-    torchvision==0.17.2+cpu \
+    torch==2.4.1+cpu \
+    torchvision==0.19.1+cpu \
     --extra-index-url https://download.pytorch.org/whl/cpu
 
 RUN uv pip install --system \
-    groq \
-    gradio \
-    deepface \
+    groq==1.5.0 \
+    gradio==6.19.0 \
+    deepface==0.0.100 \
     tf-keras \
     opencv-python-headless \
-    sentence-transformers \
+    sentence-transformers==5.6.0 \
     faiss-cpu \
     transformers \
-    twilio \
-    googlemaps \
-    gtts \
+    twilio==9.10.9 \
+    googlemaps==4.10.0 \
+    gtts==2.5.4 \
     langchain-community \
     langchain-text-splitters \
-    numpy \
+    numpy==1.26.4 \
     pandas \
     pillow
 
@@ -57,7 +64,6 @@ COPY build_knowledge_base.py .
 
 COPY checkpoints/ ./checkpoints/
 
-# here i creta data dir
 RUN mkdir -p data/chat_logs data/emotions data/crisis_alerts \
     data/session data/rag_vectorstore data/knowledge_base
 

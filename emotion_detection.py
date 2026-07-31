@@ -1,51 +1,10 @@
 """
 HealMatrix AI — Emotion Detection Module (v2, CPU-optimised)
 
-ARCHITECTURE
-------------
 Primary  : FER (FER-2013 CNN)  — fast, lightweight, loads once, CPU-friendly.
 Fallback : DeepFace            — heavier but more robust; only runs when FER is unsure.
-
-CONFIDENCE-BASED ROUTING
-------------------------
   FER confidence >= 0.60  ->  return FER result immediately (the fast path).
   FER confidence <  0.60  ->  run DeepFace and return its result (the accurate path).
-
-WHY THIS DESIGN
----------------
-• Why FER is PRIMARY: it's a small FER-2013 CNN. On a CPU it loads in
-  ~1-2s once at startup and infers in tens of milliseconds per image — far
-  lighter than DeepFace's full stack. Most everyday images are classified
-  confidently by FER alone, so the fast path handles the majority of calls.
-• Why DeepFace is FALLBACK only: DeepFace is more robust on hard images
-  (odd angles, poor lighting) but is heavier to load and slower per call.
-  Running it only when FER is unsure gives us DeepFace-level robustness on
-  the hard cases without paying its cost on every call.
-• Why HuggingFace was REMOVED: it downloaded a separate ~hundreds-of-MB
-  transformers model that overlapped heavily with FER/DeepFace (all three
-  are FER-2013-style emotion classifiers). It added install weight, memory,
-  and a network dependency for almost no accuracy benefit.
-• Why OpenCV emotion fallback was REMOVED: it never actually classified
-  emotion — it only detected whether a face existed and then returned
-  "neutral" with a fake 0.5 confidence. That's misleading data in a mental
-  health app. OpenCV is still used internally for fast face detection.
-
-PERFORMANCE NOTES (typical CPU laptop, no GPU)
-----------------------------------------------
-• FER primary:     model loads once (~1-2s startup); ~20-60 ms per image.
-• DeepFace path:   only triggers on low-confidence images; ~0.3-1.5s when it runs.
-• Memory:          one FER model held in RAM (~tens of MB). DeepFace weights
-                   load lazily only the first time the fallback is needed.
-• CPU suitability: high — single small model on the hot path, no GPU required.
-
-IMPROVEMENT OVER THE OLD PIPELINE
----------------------------------
-• vs DeepFace-only : DeepFace ran on EVERY image (slow + heavy). Now it runs
-                     only on the minority of uncertain images.
-• vs HuggingFace-only: removes a large redundant model download and its
-                     network/RAM cost.
-• vs OpenCV-only   : OpenCV alone cannot classify emotion at all (it returned
-                     a placeholder). Now every result is a real emotion score.
 """
 
 from pathlib import Path

@@ -17,3 +17,15 @@ torch
 checkpoints/bge_finetuned/model.safetensors
 .env
 .env
+
+whatsapp_bot.log
+.env
+.env.backup
+.env
+.env.save
+checkpoints/
+train_env/
+kaggle_outputs/
+pose_landmarker.task
+dataset_check/
+__pycache__/

@@ -1,6 +1,5 @@
 """
 HealMatrix AI - Large Knowledge Base Builder
-============================================
 Downloads and builds a large mental health corpus for RAG.
 
 Target: 1-5 GB of mental health text
@@ -91,7 +90,7 @@ try:
     size = out.stat().st_size / 1024 / 1024
     print(f" Saved: {out.name} ({size:.1f} MB)")
 except Exception as e:
-    print(f"  ❌ {e}")
+    print(f"  nothing {e}")
 
 # 1c. Counsel Chat
 print("\n[3/3] CounselChat (Real therapist Q-A)...")
@@ -115,7 +114,7 @@ try:
     size = out.stat().st_size / 1024 / 1024
     print(f"  Saved: {out.name} ({size:.1f} MB)")
 except Exception as e:
-    print(f"  ❌ {e}")
+    print(f"  nothing {e}")
 
 # PART 2: NIMH Articles (National Institute of Mental Health)
 print("\n" + "="*60)
@@ -234,7 +233,7 @@ with open(who_file, "w", encoding="utf-8") as f:
             pass
 
 size = who_file.stat().st_size / 1024 / 1024
-print(f"  ✅ {who_count} WHO articles → {who_file.name} ({size:.1f} MB)")
+print(f"  yes working {who_count} WHO articles → {who_file.name} ({size:.1f} MB)")
 stats["who"] = who_count
 
 # PART 4: NHS Mental Health Guides
