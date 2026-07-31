@@ -1,140 +1,98 @@
-# 🧠 HealMatrix AI
+# HealMatrix AI
 
-A multimodal mental health support system combining facial emotion detection, posture analysis, retrieval-augmented conversational support, and crisis detection into a single assistant. Built as a Final Year Project. 🎓
+HealMatrix AI is a multimodal mental health support system that combines facial emotion detection, posture analysis, retrieval augmented conversation, and crisis detection into a single assistant. It was built as a Final Year Project.
 
----
+## Overview
 
-## 📋 Overview
+The system looks at a user's facial expression, posture, and the sentiment of what they type, then pulls relevant therapeutic guidance from a knowledge base and generates an empathetic, context aware response through a language model based reasoning engine. It can also recognize language that suggests a mental health crisis and alert a designated emergency contact through WhatsApp or an automated phone call.
 
-HealMatrix AI observes a user's facial expression 😊, posture 🧍, and message sentiment 💬, retrieves relevant therapeutic guidance from a knowledge base 📚, and generates an empathetic, context-aware response through an LLM-based reasoning engine 🤖. It also detects crisis language 🚨 and can alert a designated emergency contact via WhatsApp/voice call 📞.
+## How the system works
 
----
+When a user sends a message, they can optionally include a webcam snapshot for facial emotion analysis and a voice note that gets transcribed automatically. The message and any accompanying image go through several stages.
 
-## 🔄 System Workflow
+First, facial emotion is analyzed. The emotion detection module runs a lightweight FER model as its first pass and falls back to DeepFace when that first pass isn't confident enough, returning a detected emotion along with a confidence score.
 
-1. **Input Capture** 📥 — User sends a text message, optionally with a webcam snapshot (facial emotion) and/or voice note (transcribed via Whisper).
-2. **Facial Emotion Analysis** 😐➡️😢 — `emotion_detection.py` runs FER (fast path) and falls back to DeepFace when confidence is low, returning a detected emotion + confidence score.
-3. **Posture Analysis** 🧍➡️🧎 — `pose_detection.py` uses MediaPipe landmarks + the trained MobileNetV2 classifier to detect confident / tense / slouched / neutral posture.
-4. **Sentiment Analysis** 💬 — `sentiment_analysis.py` classifies the text as positive / negative / neutral using a RoBERTa sentiment model (with keyword fallback).
-5. **Crisis Detection** 🚨 — `crisis_detection.py` scans the message for high/medium/low severity crisis language and flags it immediately if found.
-6. **Knowledge Retrieval (RAG)** 📚🔍 — `rag_system.py` embeds the query with a fine-tuned BGE model, searches a FAISS vector index of therapeutic knowledge, and retrieves the most relevant passages.
-7. **AGI Reasoning & Decision** 🧠⚙️ — `agi_engine.py` combines emotion + posture + sentiment + crisis history + RAG context to decide the best action: REASSURE 💙 / GUIDE 📚 / ESCALATE 🚨 / REFER_THERAPIST 🏥 / ASSESS 🔍 / MOTIVATE ⚡.
-8. **Response Generation** ✍️ — The decision + context is sent to Llama 3.3 70B (via Groq API), which generates an empathetic, therapist-style response, with crisis hotlines automatically prepended if needed.
-9. **Emergency Alerting** ☎️ — For high-severity crisis messages, `backend.py` triggers a WhatsApp alert and/or automated voice call to the emergency contact via Twilio.
-10. **Therapist Referral** 🗺️ — If needed, `therapist_finder.py` searches Google Maps for nearby therapists/clinics and returns contact cards.
+Second, posture is analyzed. The system uses MediaPipe to detect body landmarks in the image and a fine tuned MobileNetV2 classifier to categorize the posture as confident, tense, slouched, or neutral.
 
----
+Third, the text itself is analyzed for sentiment, classifying it as positive, negative, or neutral using a RoBERTa based sentiment model, with a simple keyword based fallback if that model isn't available.
 
-## 🧩 Core Components
+Fourth, the message is scanned for crisis language. If high, medium, or low severity crisis indicators are found, the system flags this immediately so it can be handled with priority.
 
-### 1. 😊 Emotion Detection
-- **Model:** EfficientNet-B2 (fine-tuned), with FER + DeepFace as the production fallback pipeline
-- **Dataset:** FER-2013 (enhanced), 7 classes — angry 😠, disgust 🤢, fear 😨, happy 😄, sad 😢, surprise 😲, neutral 😐
-- **Training:** dropout regularization, augmentation (rotation, color jitter, random erasing), validation-based early stopping
-- **Result:** ~69% test accuracy (weighted F1 ~0.69)
+Fifth, the system retrieves relevant knowledge. The user's message is embedded using a fine tuned BGE embedding model and used to search a FAISS vector index built from mental health counseling material, pulling back the most relevant passages.
 
-### 2. 🧍 Pose / Posture Detection
-- **Model:** MobileNetV2 (fine-tuned), 4 classes — confident 💪, tense 😬, slouched 😔, neutral 😐
-- **Dataset:** MPII Human Pose, with labels derived from a geometric rule applied to MediaPipe landmarks (shoulder tilt, forward-head offset, torso lean, head height)
-- **Result:** ~51% test accuracy (2x+ better than the 25% random-chance baseline)
-- **Known limitation:** ground truth is a geometric-rule proxy, not human-annotated; "neutral" class needs further threshold tuning
+Sixth, all of this information, the detected emotion, posture, sentiment, crisis history, and retrieved knowledge, is passed into the reasoning engine, which decides what kind of response the user actually needs. The options are to reassure, to guide them through a coping technique, to escalate because of a crisis, to refer them to a therapist, to ask a clarifying question, or to offer motivation.
 
-### 3. 📚 RAG (Retrieval-Augmented Generation)
-- **Embedding model:** BAAI/bge-small-en-v1.5 (base + fine-tuned)
-- **Vector store:** FAISS
-- **Knowledge base:** mental health counseling conversation datasets
-- **Result:** Recall@4 ~75%, MRR ~0.59
+Seventh, that decision and its supporting context are sent to a large language model, currently Llama 3.3 70B through the Groq API, which writes the actual response in an empathetic, therapist like tone. If a crisis was detected, hotline information is automatically added to the response.
 
-### 4. 🤖 AGI Reasoning Engine
-- **LLM:** Llama 3.3 70B via Groq API
-- **Decision states:** REASSURE 💙 / GUIDE 📚 / ESCALATE 🚨 / REFER_THERAPIST 🏥 / ASSESS 🔍 / MOTIVATE ⚡
-- Combines all multimodal signals to select and generate the most appropriate therapeutic response
+Eighth, if the crisis is severe, the backend automatically sends a WhatsApp alert and can place an automated phone call to a designated emergency contact through Twilio.
 
-### 5. 🚨 Crisis Detection
-- Keyword/pattern-based severity classification (none / low / medium / high)
-- Automatic hotline injection into responses ☎️
-- WhatsApp/voice emergency alerts via Twilio for high-severity cases
+Finally, if the user needs professional help, the system can search Google Maps for nearby therapists and clinics and present that information as simple contact cards.
 
-### 6. 🛠️ Supporting Modules
-- 💬 Sentiment analysis (cardiffnlp/twitter-roberta-base-sentiment-latest + keyword fallback)
-- 🎙️ Voice input transcription (Groq Whisper)
-- 🗺️ Therapist finder (Google Maps Places API)
-- 🌐 WhatsApp webhook backend (Flask + Twilio + ngrok)
+## Core components
 
----
+**Emotion detection** uses a fine tuned EfficientNet B2 model trained on an enhanced version of the FER 2013 dataset across seven emotion classes: angry, disgust, fear, happy, sad, surprise, and neutral. Training included dropout, image augmentation such as rotation, color jitter, and random erasing, and validation based early stopping. The model currently reaches about sixty nine percent test accuracy, with a weighted F1 score of about 0.69.
 
-## 📊 Evaluation Summary
+**Posture detection** uses a fine tuned MobileNetV2 model trained on the MPII Human Pose dataset, with four posture classes: confident, tense, slouched, and neutral. Since MPII doesn't come with posture labels directly, labels are derived from a geometric rule applied to MediaPipe detected landmarks, looking at shoulder tilt, forward head position, torso lean, and head height. The model currently reaches about fifty one percent test accuracy, more than double the twenty five percent random chance baseline for four classes. It's worth being upfront that the ground truth here is a geometric rule rather than human annotated labels, so this measures how well the model learned that rule rather than validated real world posture judgment, and the neutral class in particular still needs better threshold tuning.
 
-| Model | Metric | Score |
-|---|---|---|
-| 😊 Emotion Detection (EfficientNet-B2) | Accuracy | ~69% |
-| 😊 Emotion Detection (EfficientNet-B2) | F1 (weighted) | ~0.69 |
-| 🧍 Pose Detection (MobileNetV2) | Accuracy | ~51% |
-| 📚 RAG Retrieval (BGE) | Recall@4 | ~75% |
-| 📚 RAG Retrieval (BGE) | MRR | ~0.59 |
+**Retrieval augmented generation** uses the BAAI bge small English model, both in its base form and a fine tuned version, together with a FAISS vector index built over mental health counseling conversation data. Retrieval quality currently sits around seventy five percent recall at four results, with a mean reciprocal rank of about 0.59.
 
-Full details, confusion matrices, and per-class breakdowns are in `evaluation_summary.csv`, `emotion_confusion_matrix.png`, and `pose_confusion_matrix.png`. 📈
+**The reasoning engine** runs on Llama 3.3 70B through Groq and chooses between reassuring the user, guiding them through a technique, escalating a crisis, referring them to a therapist, asking a clarifying question, or offering motivation, based on everything the system has learned about their current state.
 
----
+**Crisis detection** classifies messages into none, low, medium, or high severity based on language patterns, automatically adds hotline information to responses when needed, and can trigger WhatsApp or voice alerts to an emergency contact through Twilio for high severity cases.
 
-## 🧰 Tech Stack
+**Supporting modules** round out the system: sentiment analysis using a RoBERTa based model with a keyword fallback, voice transcription using Groq's Whisper model, a therapist finder built on the Google Maps Places API, and a Flask based backend that handles WhatsApp webhooks through Twilio and ngrok.
 
-- **ML/DL:** PyTorch, torchvision, EfficientNet-PyTorch, MediaPipe, scikit-learn
-- **NLP/Retrieval:** sentence-transformers, FAISS, Hugging Face Transformers
-- **LLM:** Groq API (Llama 3.3 70B, Whisper)
-- **Backend:** Flask, Twilio API, Google Maps API
-- **Data:** Hugging Face Datasets (FER-2013, MPII Human Pose, mental health counseling conversations)
+## Evaluation summary
 
----
+Emotion detection with EfficientNet B2 reaches about sixty nine percent accuracy with a weighted F1 score of about 0.69. Posture detection with MobileNetV2 reaches about fifty one percent accuracy. RAG retrieval with the BGE model reaches about seventy five percent recall at four results with a mean reciprocal rank of about 0.59.
 
-## 📁 Project Structure
+Full evaluation details, confusion matrices, and per class breakdowns are available in evaluation_summary.csv, emotion_confusion_matrix.png, and pose_confusion_matrix.png.
 
-healmatrix-ai/ - agi_engine.py (LLM-based reasoning and response generation) - backend.py (Flask server + WhatsApp webhook) - crisis_detection.py (Crisis severity classification) - emotion_detection.py (Production emotion inference: FER/DeepFace) - emotion_finetuning.py (Emotion model training script) - pose_detection.py (Production posture inference) - pose_finetuning.py (Pose model training script) - rag_system.py (RAG retrieval logic) - rag_finetuning.py (BGE embedding fine-tuning) - sentiment_analysis.py (Text sentiment classification) - therapist_finder.py (Google Maps therapist search) - voice_input.py (Whisper-based transcription) - config.py (Environment-based configuration) - healmatrix-ai.ipynb (Training/evaluation notebook) - evaluation_summary.csv (Final metrics) - requirements.txt
+## Technology used
 
----
+The machine learning side is built on PyTorch, torchvision, EfficientNet PyTorch, MediaPipe, and scikit learn. Retrieval and natural language processing rely on sentence transformers, FAISS, and Hugging Face Transformers. The language model side uses the Groq API for both Llama 3.3 70B and Whisper. The backend runs on Flask together with the Twilio API and Google Maps API. Training data comes from Hugging Face Datasets, specifically FER 2013, MPII Human Pose, and a mental health counseling conversation dataset.
 
-## ⚙️ Setup
+## Project structure
 
-**1. Clone the repository:**
+The repository contains the reasoning engine in agi_engine.py, the Flask backend and WhatsApp webhook in backend.py, crisis severity classification in crisis_detection.py, the production emotion inference pipeline in emotion_detection.py, the emotion model training script in emotion_finetuning.py, the production posture inference pipeline in pose_detection.py, the posture model training script in pose_finetuning.py, the RAG retrieval logic in rag_system.py, the BGE embedding fine tuning script in rag_finetuning.py, text sentiment classification in sentiment_analysis.py, the Google Maps based therapist search in therapist_finder.py, Whisper based transcription in voice_input.py, environment based configuration in config.py, the training and evaluation notebook healmatrix-ai.ipynb, and the final evaluation metrics in evaluation_summary.csv.
+
+## Setup
+
+Start by cloning the repository and moving into the project folder.
+
 ```bash
 git clone https://github.com/aliasjad6536/healmatrix-ai.git
 cd healmatrix-ai
 ```
 
-**2. Create a virtual environment and install dependencies:**
+Then create a virtual environment and install the dependencies.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**3. Create a `.env` file with the required API keys:** GROQ_API_KEY, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, TWILIO_WHATSAPP_NUMBER, EMERGENCY_CONTACT, EMERGENCY_WHATSAPP, GOOGLE_MAPS_API_KEY, NGROK_AUTHTOKEN
+Next, create a .env file in the project root with the required API keys: GROQ_API_KEY, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, TWILIO_WHATSAPP_NUMBER, EMERGENCY_CONTACT, EMERGENCY_WHATSAPP, GOOGLE_MAPS_API_KEY, and NGROK_AUTHTOKEN.
 
-**4. Run the backend:**
+Finally, run the backend.
+
 ```bash
 python backend.py
 ```
 
----
+## Training and evaluation
 
-## 🧪 Training and Evaluation
+Model training and evaluation are done through healmatrix-ai.ipynb, which is designed to run in a Kaggle or Colab GPU environment. It covers loading the datasets, fine tuning the emotion and posture models, evaluating the RAG embeddings, and generating the confusion matrices and summary metrics included in this repository.
 
-Model training and evaluation are run through `healmatrix-ai.ipynb` (designed for Kaggle/Colab GPU environments). It covers dataset loading, fine-tuning for emotion and pose models, RAG embedding evaluation, and generation of the confusion matrices and summary metrics included in this repository.
+## Known limitations
 
----
+The emotion detection accuracy of around sixty nine percent is in line with what's typically published for single model CNNs on FER 2013 style benchmarks, and is limited by the low resolution of the images and genuine ambiguity between some classes, particularly fear and surprise, and sad and neutral.
 
-## ⚠️ Known Limitations
+The posture detection ground truth is derived from a geometric rule rather than human annotated labels, so its accuracy reflects how consistently the model reproduces that rule rather than validated agreement with real world posture judgments.
 
-- Emotion detection accuracy (~69%) is in line with published results on FER-2013-style benchmarks for single-model CNNs, limited by low image resolution and inherent label ambiguity (e.g. fear/surprise, sad/neutral).
-- Pose detection ground truth is derived from a geometric rule rather than human-annotated labels, so accuracy reflects self-consistency with that rule rather than validated real-world posture judgment.
-- RAG fine-tuned vs. pretrained comparisons require the fine-tuned checkpoint to be present locally; without it, evaluation falls back to the pretrained model for both sides.
+The comparison between the fine tuned and pretrained RAG models depends on the fine tuned checkpoint actually being present locally. Without it, the evaluation quietly falls back to using the pretrained model for both sides of the comparison.
 
----
+## License
 
-## 📄 License
-
-Add your license here (e.g., MIT). 📝
-
----
-
-⭐ If this project helped you, consider giving it a star!
+Add your license here, for example MIT.
