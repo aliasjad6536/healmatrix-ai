@@ -361,7 +361,7 @@ The paper is currently **unpublished** (publication pending). Until it appears, 
 ```bibtex
 @article{asjad2026healmatrix,
   title   = {HealMatrix AI: A Multimodal Reasoning Framework for Crisis-Aware Mental Health Support Using Facial Emotion Recognition, Posture Analysis, and Retrieval-Augmented Generation},
-  author  = {Asjad, Ali},
+  author  = {Ali Asjad},
   journal = {Final Year Project, University of Management and Technology, Lahore, Pakistan},
   year    = {2026}
 }
